@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Service\Requester\FetchDataService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,6 +14,14 @@ class MigrateDataCommand extends Command
 {
     protected static $defaultName = 'data:migrate';
     protected static $defaultDescription = 'Fetch data from source into file or database';
+
+    private $fetchDataService;
+
+    public function __construct(FetchDataService $fetchDataService)
+    {
+        parent::__construct();
+        $this->fetchDataService = $fetchDataService;
+    }
 
     protected function configure(): void
     {
@@ -27,6 +36,8 @@ class MigrateDataCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $src = $input->getArgument('src');
+
+        $this->fetchDataService->fetch($src);
 
         $io->success('Success!');
 
