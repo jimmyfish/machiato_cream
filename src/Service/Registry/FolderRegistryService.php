@@ -22,4 +22,9 @@ class FolderRegistryService
     {
         return $this->getTemporaryDir() . "/inputs";
     }
+
+    protected function translateInputFile($filename)
+    {
+        return $this->getInputDir() . "/$filename";
+    }
 }
