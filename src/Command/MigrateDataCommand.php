@@ -42,7 +42,7 @@ class MigrateDataCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $src = $input->getArgument('src');
         $filetype = $input->getOption('filetype');
-        $db = $input->getOption('db');
+        $db = $input->getOption('db') == 'true';
 
         if (!in_array($filetype, $this->supportedFileType)) {
             $io->warning('Filetype not supported');
