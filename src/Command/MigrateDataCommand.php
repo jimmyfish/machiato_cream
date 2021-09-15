@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Service\Data\DataProcessorService;
 use App\Service\Requester\FetchDataService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,16 +16,16 @@ class MigrateDataCommand extends Command
     protected static $defaultName = 'data:migrate';
     protected static $defaultDescription = 'Fetch data from source into file or database';
 
-    private $fetchDataService;
+    private $dataProcessorService;
     private array $supportedFileType = [
         'csv',
         'yaml',
     ];
 
-    public function __construct(FetchDataService $fetchDataService)
+    public function __construct(DataProcessorService $dataProcessorService)
     {
         parent::__construct();
-        $this->fetchDataService = $fetchDataService;
+        $this->dataProcessorService = $dataProcessorService;
     }
 
     protected function configure(): void
@@ -32,7 +33,7 @@ class MigrateDataCommand extends Command
         $this
             ->addArgument('src', InputArgument::REQUIRED, 'Set of data needed to be pulled')
             ->addOption('filetype', null, InputArgument::OPTIONAL, 'Specify output file')
-            ->addOption('save-to-db', null, InputArgument::OPTIONAL, 'Save to DB')
+            ->addOption('db', null, InputArgument::OPTIONAL, 'Save to DB')
         ;
     }
 
@@ -41,15 +42,16 @@ class MigrateDataCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $src = $input->getArgument('src');
         $filetype = $input->getOption('filetype');
+        $db = $input->getOption('db');
 
-        if (array_search($filetype, $this->supportedFileType) === false) {
+        if (!in_array($filetype, $this->supportedFileType)) {
             $io->warning('Filetype not supported');
             return Command::FAILURE;
         }
 
-        $this->fetchDataService->fetch($src);
+        $return = $this->dataProcessorService->{$filetype}($src, $db);
 
-        $io->success('Success!');
+        if (is_string($return)) $io->success($return);
 
         return Command::SUCCESS;
     }
