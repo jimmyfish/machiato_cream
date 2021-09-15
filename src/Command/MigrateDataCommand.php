@@ -16,6 +16,10 @@ class MigrateDataCommand extends Command
     protected static $defaultDescription = 'Fetch data from source into file or database';
 
     private $fetchDataService;
+    private array $supportedFileType = [
+        'csv',
+        'yaml',
+    ];
 
     public function __construct(FetchDataService $fetchDataService)
     {
@@ -36,6 +40,12 @@ class MigrateDataCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $src = $input->getArgument('src');
+        $filetype = $input->getOption('filetype');
+
+        if (array_search($filetype, $this->supportedFileType) === false) {
+            $io->warning('Filetype not supported');
+            return Command::FAILURE;
+        }
 
         $this->fetchDataService->fetch($src);
 
