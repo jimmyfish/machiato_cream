@@ -14,6 +14,11 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class FetchDataService extends FolderRegistryService
 {
+    public function duplicateExists(string $src)
+    {
+        return $this->filesystem->exists(md5($src));
+    }
+
     public function fetch(string $src)
     {
         $filesystem = new Filesystem();
@@ -21,29 +26,32 @@ class FetchDataService extends FolderRegistryService
         if (!$filesystem->exists($this->getInputDir())) {
             $filesystem->mkdir($this->getInputDir());
         }
-        
-        $fileHandler = null;
 
         try {
-            $client = HttpClient::create();
+            $filename = md5($src);
+            $filenameWithExt = "$filename.jsonl";
 
-            $response = $client->request('GET', $src);
+            if (!$filesystem->exists($this->getInputDir() . "/$filenameWithExt")) {
+                $client = HttpClient::create();
+                $response = $client->request('GET', $src);
+                if ($response->getStatusCode() !== 200) throw new Exception('File failed to received');
 
-            if ($response->getStatusCode() !== 200) throw new Exception('GTFO');
+                $fileHandler = fopen($this->getInputDir() . "/$filenameWithExt", "w+");
 
-            $filename = md5(uniqid()) . ".jsonl";
-
-            $fileHandler = fopen($this->getInputDir() . "/" . $filename, "w+");
-
-            foreach ($client->stream($response) as $chunk) {
-                fwrite($fileHandler, $chunk->getContent());
+                foreach ($client->stream($response) as $chunk) {
+                    fwrite($fileHandler, $chunk->getContent());
+                }
             }
+
+            return [
+                'filename' => $filename,
+                'filenameWithExtension' => $filenameWithExt,
+                'fullPath' => $this->getInputDir() . "/$filenameWithExt",
+            ];
         } catch (TransportExceptionInterface $exception) {
             return new JsonResponse(["message" => $exception->getMessage()]);
         } catch (Exception $exception) {
             return new JsonResponse(["message" => $exception->getMessage()]);
         }
-
-        return $fileHandler;
     }
 }
