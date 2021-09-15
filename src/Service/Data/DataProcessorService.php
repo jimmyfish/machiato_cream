@@ -2,7 +2,10 @@
 
 namespace App\Service\Data;
 
+use DateTime;
+use App\Entity\Order;
 use Symfony\Component\Yaml\Yaml;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Service\Requester\FetchDataService;
 use Symfony\Component\Filesystem\Filesystem;
 use App\Service\Registry\FolderRegistryService;
@@ -22,17 +25,20 @@ class DataProcessorService extends FolderRegistryService
         "total_units_count",
         "customer_state"
     ];
+    private $em;
 
     public function __construct(
         FetchDataService $fetchDataService,
         KernelInterface $kernelInterface,
         DataManipulationService $dataManipulationService,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        EntityManagerInterface $em
     ) {
         parent::__construct($kernelInterface);
         $this->fetchDataService = $fetchDataService;
         $this->dataManipulationService = $dataManipulationService;
         $this->filesystem = $filesystem;
+        $this->em = $em;
 
         if (!$this->filesystem->exists($this->getOutputPath())) $this->filesystem->mkdir($this->getOutputPath());
     }
@@ -64,7 +70,9 @@ class DataProcessorService extends FolderRegistryService
             fwrite($fileToBeWritten, "\n");
         }
 
-        return $outputFile;
+        if ($db) $this->insertIntoDB($csvItems, $fetcher['filename']);
+
+        return $db ? "Batch number : " . $fetcher['filename'] : $outputFile;
     }
 
     public function yaml(string $src, bool $db = false)
@@ -79,11 +87,34 @@ class DataProcessorService extends FolderRegistryService
 
         file_put_contents($outputFile, $yaml);
 
-        return $outputFile;
+        if ($db) $this->insertIntoDB($result, $fetcher['filename']);
+
+        return $db ? "Batch number : " . $fetcher['filename'] : $outputFile;
     }
 
     public function getFullPath(string $input)
     {
         return $this->getInputDir() . "/$input";
+    }
+
+    public function insertIntoDB($data, $batchNumber)
+    {
+        foreach ($data as $datum) {
+            $collections = new Order();
+            $collections->setOrderId($datum['order_id']);
+            $collections->setOrderDatetime(new DateTime($datum['order_datetime']));
+            $collections->setTotalOrderValue($datum['total_order_value']);
+            $collections->setAverageUnitPrice($datum['average_unit_price']);
+            $collections->setDistinctUnitCount($datum['distinct_unit_count']);
+            $collections->setTotalUnitsCount($datum['total_unit_count']);
+            $collections->setCustomerState($datum['customer_state']);
+            $collections->setBatchNumber($batchNumber);
+
+            $this->em->persist($collections);
+        }
+
+        $this->em->flush();
+
+        return $batchNumber;
     }
 }
