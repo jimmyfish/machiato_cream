@@ -14,11 +14,6 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class FetchDataService extends FolderRegistryService
 {
-    public function duplicateExists(string $src)
-    {
-        return $this->filesystem->exists(md5($src));
-    }
-
     public function fetch(string $src)
     {
         $filesystem = new Filesystem();
