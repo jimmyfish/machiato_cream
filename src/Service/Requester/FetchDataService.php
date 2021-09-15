@@ -2,11 +2,13 @@
 
 namespace App\Service\Requester;
 
-use App\Service\Registry\FolderRegistryService;
+use DateTime;
 use Exception;
 use GuzzleHttp\Client;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpClient\HttpClient;
+use App\Service\Registry\FolderRegistryService;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class FetchDataService extends FolderRegistryService
 {
@@ -23,10 +25,10 @@ class FetchDataService extends FolderRegistryService
     {
         $filesystem = new Filesystem();
 
-        if (!$filesystem->exists(sys_get_temp_dir() . "/inputs")) {
-            $filesystem->mkdir(sys_get_temp_dir() . "/inputs");
+        if (!$filesystem->exists($this->getInputDir())) {
+            $filesystem->mkdir($this->getInputDir());
         }
 
-        $filename = md5(uniqid());
+        $filename = md5(uniqid()) . ".jsonl";
     }
 }
