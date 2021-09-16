@@ -28,7 +28,7 @@ class FolderRegistryService
         return $this->getInputDir() . "/$filename";
     }
 
-    protected function getOutputPath(string $additionalPath = "")
+    public function getOutputPath(string $additionalPath = "")
     {
         return $this->appKernel->getProjectDir() . "/var/output/$additionalPath";
     }
