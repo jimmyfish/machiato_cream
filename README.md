@@ -29,6 +29,7 @@ Configuring database
 1. Open your .env file
 2. Change the configuration based on your database config  
     change line `DATABASE_URL=mysql://user:password@127.0.0.1:3306/dbname`
+3. Change the configuration based on your mailer config, `MAILER_DSN=smtp://user:password@smtpurl:port?encryption=tls&auth_mode=login`
 3. Run migration
     `php bin/console doctrine:schema:update --force`
 4. Enjoy with a cup of coffee ~
