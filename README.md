@@ -34,7 +34,7 @@ Configuring database
     `php bin/console doctrine:schema:update --force`
 4. Enjoy with a cup of coffee ~
 
-**API Endpoint**
+**Console Command**
 
 - Converting *.JSONL
 
