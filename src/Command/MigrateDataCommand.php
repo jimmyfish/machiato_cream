@@ -32,6 +32,7 @@ class MigrateDataCommand extends Command
             ->addArgument('src', InputArgument::REQUIRED, 'Set of data needed to be pulled')
             ->addOption('filetype', null, InputArgument::OPTIONAL, 'Specify output file')
             ->addOption('db', null, InputArgument::OPTIONAL, 'Save to DB')
+            ->addOption('email', null, InputArgument::OPTIONAL, 'Specify where to email the attachment')
         ;
     }
 
@@ -41,13 +42,14 @@ class MigrateDataCommand extends Command
         $src = $input->getArgument('src');
         $filetype = $input->getOption('filetype');
         $db = $input->getOption('db') == 'true';
+        $email = $input->hasOption('email') ? $input->getOption('email') : null;
 
         if (!in_array($filetype, $this->supportedFileType)) {
             $io->warning('Filetype not supported');
             return Command::FAILURE;
         }
 
-        $return = $this->dataProcessorService->{$filetype}($src, $db);
+        $return = $this->dataProcessorService->{$filetype}($src, $db, $email);
 
         if (is_string($return)) $io->success($return);
 
