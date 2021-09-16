@@ -72,7 +72,7 @@ class DataProcessorService extends FolderRegistryService
 
         if ($db) $this->insertIntoDB($csvItems, $fetcher['filename']);
 
-        if ($email) $this->sendEmailService->send($email, "", [], "", $fetcher['filenameWithExtension']);
+        if ($email) $this->sendEmailService->send($email, "", [], "", $outputFile);
 
         return $db ? "Batch number : " . $fetcher['filename'] : $outputFile;
     }
@@ -91,7 +91,7 @@ class DataProcessorService extends FolderRegistryService
 
         if ($db) $this->insertIntoDB($result, $fetcher['filename']);
 
-        if ($email) $this->sendEmailService->send($email, "", [], "", $fetcher['filenameWithExtension']);
+        if ($email) $this->sendEmailService->send($email, "", [], "", $outputFile);
 
         return $db ? "Batch number : " . $fetcher['filename'] : $outputFile;
     }
