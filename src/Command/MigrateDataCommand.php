@@ -40,7 +40,7 @@ class MigrateDataCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $src = $input->getArgument('src');
-        $filetype = $input->getOption('filetype');
+        $filetype = $input->getOption('filetype') ?? 'csv';
         $db = $input->getOption('db') == 'true';
         $email = $input->hasOption('email') ? $input->getOption('email') : null;
 
