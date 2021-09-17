@@ -19,6 +19,16 @@ class OrderRepository extends ServiceEntityRepository
         parent::__construct($registry, Order::class);
     }
 
+    public function countDataUsingHash($hash)
+    {
+        return $this->createQueryBuilder('o')
+            ->select('count(o.id)')
+            ->andWhere('o.batchNumber = :val')
+            ->setParameter('val', $hash)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     // /**
     //  * @return Order[] Returns an array of Order objects
     //  */
